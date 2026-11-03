@@ -1,123 +1,71 @@
-# Getting Started with Create React App
+# AyoZon
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A small shop for landscape photographs sold as full-resolution downloads. Built with React (Vite + Tailwind) and a
+Flask API, with Stripe payments, emailed delivery through Resend, and an admin dashboard for managing the catalogue.
 
-## Available Scripts
+Payments run in Stripe test mode: nothing is ever charged.
 
-In the project directory, you can run:
+## What it does
 
-### `npm start`
+- **Shop**: a crossfading hero of the catalogue, a gallery you can sort, a page per photograph with its real size,
+  and a cart that remembers its contents.
+- **Checkout**: Stripe's Payment Element, styled to match the site, with copyable test cards. The server sets the
+  price, never the browser.
+- **Delivery**: after payment, the order page has a download button for each photograph (protected by a per-order
+  token), and an email arrives with the files attached.
+- **Admin**: revenue, orders and the best seller at a glance, a table of photographs with sales counts, recent
+  orders, and one editor for adding or editing a photograph (drag and drop upload, inline validation).
+- Light and dark themes (follows the system until you choose), lucide icons throughout, and a layout that works on phones.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Run it
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+You need Node 20+ and Python 3.10+.
 
-### `npm test`
+```bash
+cp .env.example .env          # then add your Stripe test keys
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# API on :5003
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python app.py
 
-### `npm run build`
+# Frontend on :5173 (proxies /api and /uploads to the API)
+npm install
+npm run dev
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Open http://localhost:5173. The admin is at `/admin` (demo login `admin` / `admin123`).
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+With no reachable `MONGO_URI`, the API keeps products and orders in `data/store.json` and seeds the nine demo
+photographs from `seed/` on first run, so it works with nothing else installed.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Test cards
 
-### `npm run eject`
+| Card | Result |
+| --- | --- |
+| 4242 4242 4242 4242 | Pays straight away |
+| 4000 0025 0000 3155 | Asks for a 3D Secure check |
+| 4000 0000 0000 0002 | Is declined |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Use any future expiry date, any CVC and any postcode.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Layout
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
+app.py            Flask API: catalogue, checkout, downloads, admin
+store.py          Storage: MongoDB when reachable, otherwise a JSON file
+seed/             Demo photographs and their catalogue entries
+src/
+  main.jsx        Routes and providers
+  context/        Cart, admin session, theme, toasts
+  lib/            API client, formatting, data hooks, Stripe loader
+  components/ui/  Button, Field, Photo, dialogs, loading/empty/error states
+  components/     Shop layout and admin layout pieces
+  pages/          Home, photograph, checkout, order, admin pages
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Photo credits
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-This Project is built on a React frontend and a Python Flask backend with Stripe payment integration.
-
-## Setup Instructions
-
-### Backend Setup
-1. Install Python dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. Create `.env` file (copy from `.env.example`):
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Configure environment variables in `.env`:
-   - Get MongoDB URI (local or MongoDB Atlas)
-   - Get Stripe keys from https://dashboard.stripe.com
-   - Get Resend API key from https://resend.com
-   - Set your sender email
-
-4. Run the Flask backend:
-   ```bash
-   python app.py
-   ```
-
-### Frontend Setup
-1. Install Node dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Start the React development server:
-   ```bash
-   npm start
-   ```
-
-### Environment Variables Required
-- `MONGO_URI`: MongoDB connection string
-- `STRIPE_SECRET_KEY`: Stripe secret key (starts with sk_)
-- `STRIPE_PUBLISHABLE_KEY`: Stripe publishable key (starts with pk_)
-- `RESEND_API_KEY`: Resend email service API key
-- `FROM_EMAIL`: Email address for sending confirmations
-
-## Digital Photo Marketplace Features
-- Browse available photos
-- Secure payment processing with Stripe
-- Email confirmation after purchase
-- Order tracking in MongoDB
-- Responsive design with Tailwind CSS
-
-
+The demo photographs are from Unsplash (Unsplash licence), served through picsum.photos: elizabeth lies, Andre Koch,
+Martin Dörsch, Cornelia Büchse, Matt Benson, McDobbie Hu, Gozha Net, Biegun Wschodni and Jason Long. Each one is
+credited on its own page. Replace them with your own work from the admin dashboard.

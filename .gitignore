@@ -13,3 +13,9 @@ cookies.txt
 # Additional ignores for your project
 uploads/
 *.tmp
+data/
+.venv/
+.taste-skill/
+dist/
+__pycache__/
+*.pyc
